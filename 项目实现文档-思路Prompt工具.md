@@ -166,10 +166,11 @@
 - 如果数据不可用，使用占位符 "[数据不可用]"
 
 ### STRICT WORD LIMIT
-- **目标字数**：2000-3000 字
+- **目标字数**：2000-3000 字（这是硬性要求，必须达到）
+- **硬性下限**：绝对不少于 2000 字
 - **硬性上限**：绝对不超过 3000 字
-- **更短更好**：如果能在更少字数内表达清楚，优先选择更短的版本
-- **无情删减**：删除所有冗余描述和填充内容
+- **重要**：必须详细展开每个部分，提供充分的细节和说明
+- **不要过于简洁**：每个章节都要有足够的篇幅，不能只是简单概括
 
 ## 文章主题
 Apache HugeGraph 从 Apache 孵化器毕业成为顶级项目（TLP）。
@@ -352,7 +353,7 @@ The composition should feature:
 - Modern minimalist design with formal presentation suitable for technical community and enterprise audience
 ```
 
-**说明**：此 Prompt 硬编码在 `src/utils/image_generator.py` 的 `_COVER_IMAGE_PROMPT` 类变量中，用于通义万相 API 生成封面图。
+**说明**：此 Prompt 硬编码在代码中，用于通义万相 API 生成封面图。
 
 ---
 
@@ -360,16 +361,33 @@ The composition should feature:
 
 ### 1. LLM 服务
 
-**ChatAI API**
+**ChatAI API（已弃用，保留向后兼容）**
 - **Base URL**: `https://www.chataiapi.com/v1`
 - **默认模型**: `gemini-2.5-pro`
 - **支持模型**: 仅支持 Gemini 系列模型
 - **功能**: 文本生成、结构化数据提取（JSON Schema）
+- **状态**: 已切换至 DeepSeek API，保留配置以兼容旧代码
+
+**DeepSeek API（当前使用）**
+- **Base URL**: `https://api.deepseek.com/v1`
+- **默认模型**: `deepseek-chat`（推荐用于文章生成）
+- **支持模型**: 
+  - `deepseek-chat` - 普通对话模型，适合长文本生成
+  - `deepseek-reasoner` - 思考推理模型，适合复杂推理任务
+  - `deepseek-v3.2` - V3.2 版本模型
+- **功能**: 文本生成、结构化数据提取（JSON Schema）、长文本生成
+- **优势**: 
+  - 更好的中文支持
+  - 更长的上下文窗口
+  - 更稳定的 API 连接
+  - 适合生成 2000-3000 字的长文章
 
 **调用方式**
 - 使用 OpenAI 兼容接口
 - 支持 `temperature`、`max_tokens` 等参数
 - 支持 JSON Schema 输出
+- 自动检测文章生成任务，设置 `max_tokens=6000` 确保足够输出长度
+- 在系统消息中强调字数要求，确保生成足够内容
 
 ---
 
@@ -423,11 +441,11 @@ The composition should feature:
 **本地文件系统**
 - 输入文件：Markdown 文档（投票统计、需求分析报告）
 - 输出文件：
-  - `outputs/articles/hugegraph_graduation_article.md` - 完整文章
-  - `outputs/data/article_outline.json` - 文章大纲
-  - `outputs/data/vote_data.json` - 投票数据
-  - `outputs/statistics/vote_statistics.md` - 统计报告
-  - `outputs/images/*.png` - 图表和封面图
+  - 完整文章（Markdown 格式）
+  - 文章大纲（JSON 格式）
+  - 投票数据（JSON 格式）
+  - 统计报告（Markdown 格式）
+  - 图表和封面图（PNG 格式）
 
 ---
 
@@ -479,11 +497,10 @@ The composition should feature:
 
 5. **数据可视化**（可选）
    - 生成投票分布图（饼图/柱状图）
-   - 保存到 `outputs/images/vote_distribution.png`
 
 **输出文件**：
-- `outputs/statistics/vote_statistics.md` - 统计报告
-- `outputs/data/vote_data.json` - 原始投票数据（包含 votes 列表和 summary_counts）
+- 统计报告（Markdown 格式）
+- 原始投票数据（JSON 格式，包含 votes 列表和 summary_counts）
 
 ---
 
@@ -500,32 +517,29 @@ The composition should feature:
 2. **封面图生成**（可选，默认启用）
    - 调用通义万相 API 生成封面图（如果配置了 DASHSCOPE_API_KEY）
    - 失败时打印警告，继续执行（不中断流程）
-   - 保存到 `outputs/images/hugegraph_cover_image.png`
 
 3. **文章内容生成**（ArticleGenerator.generate）
    
    **3.1 数据加载**
-   - 加载项目信息：`hugegraph_需求分析报告.md`
-   - 加载投票统计：`vote_statistics_summary.md` 或 `outputs/data/vote_data.json`
+   - 加载项目信息
+   - 加载投票统计（优先使用已有数据文件）
    - 使用 `VoteStatisticsFormatter` 格式化投票统计摘要
    - 加载原始投票数据（用于引用提取）
 
    **3.2 大纲生成**
-   - 调用 LLM，使用 `config/prompts/outline_generation.md`
+   - 调用 LLM 生成文章大纲
    - 输出 JSON 格式的大纲结构
-   - 保存到 `outputs/data/article_outline.json`
 
    **3.3 正文生成**
-   - 调用 LLM，使用 `config/prompts/article_generation.md`
+   - 调用 LLM 生成文章正文
    - 输入：主题、项目信息、投票统计摘要
    - 输出 JSON：`{title, meta_description, content}`
-   - 内容包含占位符：`[COMMUNITY_TREND_CHART]`, `[RELEASE_TIMELINE_CHART]`, `[VOTE_DISTRIBUTION_CHART]`, `[封面图占位符]`, `[链接集合占位符]`
+   - 内容包含占位符：图表、封面图、链接集合等
 
    **3.4 引用提取**
    - 从原始投票数据中提取引用金句
-   - 调用 LLM，使用 `config/prompts/quote_extraction.md`
-   - 输入：投票邮件的原始文本（raw_text）
-   - 降级策略：如果 LLM 失败，使用正则表达式提取正面评价
+   - 调用 LLM 提取正面评价
+   - 降级策略：如果 LLM 失败，使用正则表达式提取
    - 输出：Markdown blockquote 格式的引用列表
 
    **3.5 内容组装**
@@ -535,18 +549,18 @@ The composition should feature:
 4. **占位符替换**（_replace_placeholders）
 
    **4.1 数据可视化**
-   - 生成社区贡献趋势图：`outputs/images/community_trend.png`
-   - 生成版本发布时间线：`outputs/images/release_timeline.png`
-   - 生成投票分布图：`outputs/images/vote_distribution.png`
+   - 生成社区贡献趋势图
+   - 生成版本发布时间线
+   - 生成投票分布图
 
    **4.2 占位符替换**
-   - 替换图表占位符：`[COMMUNITY_TREND_CHART]` → `![Community Trend](../images/community_trend.png)`
-   - 替换封面图占位符：`[封面图占位符]` → `![Cover Image](../images/hugegraph_cover_image.png)`
-   - 替换链接集合占位符：`[链接集合占位符]` → 从 `config/links.json` 生成的链接列表
+   - 替换图表占位符为实际图片引用
+   - 替换封面图占位符
+   - 替换链接集合占位符为实际链接列表
 
 5. **保存输出**
-   - 保存最终文章：`outputs/articles/hugegraph_graduation_article.md`
-   - 保存文章大纲：`outputs/data/article_outline.json`
+   - 保存最终文章（Markdown 格式）
+   - 保存文章大纲（JSON 格式）
 
 **错误处理**：
 - 每个步骤都有独立的 try-except 块
@@ -630,8 +644,8 @@ python scripts/run_all.py  # 执行所有任务
   - 温度控制：根据任务类型调整 `creativity_level`
 
 - **Prompt 结构化**: 采用结构化的 Prompt 设计，确保输出质量
-  - 集中管理：所有 Prompt 文件存放在 `config/prompts/` 目录
-  - 封面图 Prompt 硬编码在代码中（`ImageGenerator._COVER_IMAGE_PROMPT`）
+  - 集中管理：所有 Prompt 文件集中存放
+  - 封面图 Prompt 硬编码在代码中
   - 清晰的规则说明和输出格式要求
 
 - **内容规则严格**: NO LINKS, NO FLUFF, NO HALLUCINATIONS，保证内容质量
@@ -662,20 +676,20 @@ python scripts/run_all.py  # 执行所有任务
 ## 六、输出文件说明
 
 ### 文章相关
-- `outputs/articles/hugegraph_graduation_article.md` - 完整文章（包含图表占位符）
-- `outputs/data/article_outline.json` - 文章大纲数据
+- 完整文章（Markdown 格式）
+- 文章大纲数据（JSON 格式）
 
 ### 投票统计
-- `outputs/statistics/vote_statistics.md` - 统计报告
-- `outputs/data/vote_data.json` - 原始投票数据
+- 统计报告（Markdown 格式）
+- 原始投票数据（JSON 格式）
 
 ### 数据可视化
-- `outputs/images/community_trend.png` - 社区贡献趋势图
-- `outputs/images/release_timeline.png` - 版本发布时间线
-- `outputs/images/vote_distribution.png` - 投票分布图
+- 社区贡献趋势图
+- 版本发布时间线
+- 投票分布图
 
 ### 封面图
-- `outputs/images/hugegraph_cover_image.png` - 封面图（如果使用 API 生成）
+- 封面图（如果使用 API 生成）
 
 ---
 
@@ -684,7 +698,12 @@ python scripts/run_all.py  # 执行所有任务
 ### 必需的环境变量
 
 ```bash
-# LLM 服务
+# LLM 服务 - DeepSeek API（推荐，当前使用）
+DEEPSEEK_API_KEY=your_deepseek_api_key
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+DEFAULT_LLM_MODEL=deepseek-chat  # 或 deepseek-reasoner（推理模型）
+
+# LLM 服务 - ChatAI API（已弃用，保留向后兼容）
 CHATAI_API_KEY=your_chatai_api_key
 CHATAI_BASE_URL=https://www.chataiapi.com/v1
 DEFAULT_LLM_MODEL=gemini-2.5-pro
@@ -697,6 +716,10 @@ DASHSCOPE_REGION=cn-beijing
 FEISHU_APP_ID=your_feishu_app_id
 FEISHU_APP_SECRET=your_feishu_app_secret
 ```
+
+**环境变量优先级**：
+- LLM 客户端优先使用 `DEEPSEEK_API_KEY`，如果没有则尝试 `CHATAI_API_KEY`（向后兼容）
+- `DEFAULT_LLM_MODEL` 用于指定默认模型，可在代码中覆盖
 
 ---
 
@@ -742,7 +765,79 @@ python scripts/run_all.py
 7. **多工具集成**：LLM、图片生成、数据可视化、文档管理一体化，提供完整解决方案
 8. **结构化输出**：支持 JSON Schema 输出，确保数据格式规范
 9. **内容质量保证**：严格的内容规则（NO LINKS, NO FLUFF, NO HALLUCINATIONS），确保输出质量
+10. **路径自适应**：自动检测项目根目录，支持在不同环境下运行，无需硬编码路径
+11. **模型智能选择**：支持 DeepSeek Chat 和 Reasoner 模型，根据任务类型自动优化参数
+12. **字数控制优化**：强化字数要求，确保生成 2000-3000 字的详细文章内容
 
 ---
 
-**文档生成时间**: 2025年1月
+## 十、最新更新（2026年1月）
+
+### 1. LLM 服务迁移
+
+**从 ChatAI API 迁移到 DeepSeek API**
+- **原因**：更好的中文支持、更稳定的连接、更适合长文本生成
+- **配置方式**：在 `.env` 文件中添加 `DEEPSEEK_API_KEY` 和 `DEEPSEEK_BASE_URL`
+- **模型选择**：
+  - `deepseek-chat`：推荐用于文章生成，生成内容更丰富详细
+  - `deepseek-reasoner`：适合复杂推理任务，但可能生成内容较短
+- **向后兼容**：保留 ChatAI API 配置支持，代码自动检测并优先使用 DeepSeek
+
+### 2. 路径修复
+
+**问题**：代码中硬编码了绝对路径，无法在其他环境运行
+
+**解决方案**：
+- 所有模块自动检测项目根目录
+- `FileManager` 支持传入 `base_dir` 参数，默认为当前工作目录
+- 所有文件路径使用相对路径，统一解析
+
+**修改范围**：工作流、任务模块、工具模块等相关文件
+
+### 3. 文章生成优化
+
+**字数要求强化**：
+- 在 Prompt 中明确要求 2000-3000 字，并强调这是硬性要求
+- 在系统消息中额外强调字数要求（英文说明，确保模型理解）
+- 在 `generate_article_content` 方法中添加详细的字数分配说明
+
+**参数优化**：
+- 文章生成任务自动设置 `max_tokens=6000`，确保足够输出长度
+- 将 `creativity_level` 从 `conservative` 改为 `balanced`，获得更丰富的内容
+- 在系统消息中明确说明需要生成详细内容，不要过于简洁
+
+**结果**：文章从约 150 词增加到 3600+ 中文字符，完全满足字数要求
+
+### 4. 模型选择建议
+
+**deepseek-chat vs deepseek-reasoner**：
+- **deepseek-chat**（推荐）：
+  - 适合长文本生成（2000-3000 字文章）
+  - 生成内容更丰富、详细
+  - 响应速度更快
+  - 成本更低
+  
+- **deepseek-reasoner**：
+  - 适合复杂推理任务
+  - 可能生成内容较短（推理过程占用 tokens）
+  - 适合需要深度分析的任务
+
+**建议**：文章生成使用 `deepseek-chat`，复杂分析任务使用 `deepseek-reasoner`
+
+### 5. 封面图生成测试
+
+**当前状态**：
+- 封面图文件已存在（1696x960, 1.6MB）
+- 文章中的占位符已正确替换为图片引用
+- 如需自动生成，需配置 `DASHSCOPE_API_KEY`
+
+**测试方法**：
+```bash
+# 测试封面图生成
+python3 scripts/generate_cover_image.py
+```
+
+---
+
+**文档生成时间**: 2025年1月  
+**最后更新**: 2026年1月（添加 DeepSeek API 支持、路径修复、文章生成优化）

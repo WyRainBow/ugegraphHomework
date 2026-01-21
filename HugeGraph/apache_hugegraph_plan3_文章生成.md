@@ -38,13 +38,13 @@ todos:
 ### 1. 创建 Prompt 模板
 
 **需要创建的 Prompt 文件**：
-- `config/prompts/article_generation.md` - 文章生成 prompt（参考 Sophia 的 `_build_content_prompt`）
+- `config/prompts/article_generation.md` - 文章生成 prompt
 - `config/prompts/outline_generation.md` - 大纲生成 prompt
 - `config/prompts/quote_extraction.md` - 引用提取 prompt
 - `config/prompts/cover_image.md` - 封面图生成 prompt（使用已有的 `cover_image_prompts.md`）
 
 **Prompt 设计要点**：
-- 参考 Sophia 的 prompt 结构和规则
+- 采用结构化的 prompt 设计和规则
 - 关键规则：NO LINKS, NO FLUFF, NO HALLUCINATIONS, STRICT WORD LIMIT
 - 格式化规则：短段落、避免 bullet points、主动语态
 - JSON schema 输出格式

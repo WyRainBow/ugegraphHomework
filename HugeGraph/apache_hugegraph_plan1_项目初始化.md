@@ -6,7 +6,7 @@ todos:
     content: 创建项目目录结构和基础文件（README.md, requirements.txt, .env.example）
     status: pending
   - id: implement_llm_client
-    content: 实现 LLM 客户端（参考 Sophia 的 craft_ai_func 接口）
+    content: 实现 LLM 客户端（统一的调用接口）
     status: pending
   - id: implement_file_manager
     content: 实现文件管理工具（读取/写入文件、数据加载）
@@ -22,7 +22,7 @@ todos:
 
 创建项目的基础架构，包括：
 - 项目目录结构
-- LLM 客户端（基于 Sophia 的 craft_ai_func 设计）
+- LLM 客户端（统一的调用接口设计）
 - 文件管理工具
 - 配置文件和环境变量
 
@@ -61,7 +61,7 @@ todos:
 
 ### 2. 实现 LLM 客户端 (`src/core/llm_client.py`)
 
-参考 Sophia 的 `craft_ai_func` 设计：
+LLM 客户端设计：
 
 **功能要求**：
 - 支持 ChatAI API（兼容 OpenAI 格式）

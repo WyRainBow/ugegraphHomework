@@ -21,7 +21,9 @@ def main() -> None:
     parser.add_argument("--thread", default="https://lists.apache.org/thread/djkxttgpj08v74r8rqdv3np856g3krlr", help="投票线程 URL")
     args = parser.parse_args()
     
-    fm = FileManager("/Users/wy770/Apache")
+    # 使用当前项目根目录
+    project_root = Path(__file__).resolve().parents[1]
+    fm = FileManager(str(project_root))
     
     try:
         # 步骤1: 投票分析
@@ -32,7 +34,7 @@ def main() -> None:
         if args.use_summary:
             print("使用已有的统计摘要文件...")
             import re
-            SUMMARY_PATH = "/Users/wy770/Apache/vote_statistics_summary.md"
+            SUMMARY_PATH = "vote_statistics_summary.md"
             summary_text = fm.read_text(SUMMARY_PATH)
             
             binding = re.search(r"\*\*\+1 IPMC Binding\*\*\s*\|\s*(\d+)票", summary_text)
@@ -69,7 +71,7 @@ def main() -> None:
         print("步骤 2/2: 生成文章")
         print("=" * 60)
         
-        workflow = GraduationWorkflow()
+        workflow = GraduationWorkflow(base_dir=str(project_root))
         workflow.run()
         
         print("\n" + "=" * 60)

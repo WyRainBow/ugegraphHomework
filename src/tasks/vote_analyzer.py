@@ -19,9 +19,14 @@ class VoteAnalyzer:
         api_client: Optional[ApacheAPIClient] = None,
         file_manager: Optional[FileManager] = None,
     ) -> None:
+        from pathlib import Path
         self.llm = llm_client
         self.api = api_client or ApacheAPIClient()
-        self.fm = file_manager or FileManager("/Users/wy770/Apache")
+        if file_manager is None:
+            # 获取项目根目录（src/tasks 的父目录的父目录）
+            project_root = Path(__file__).resolve().parents[2]
+            file_manager = FileManager(str(project_root))
+        self.fm = file_manager
 
     def _extract_vote_with_llm(self, body: str) -> Optional[Dict[str, Any]]:
         """

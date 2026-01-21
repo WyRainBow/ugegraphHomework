@@ -4,7 +4,7 @@
 
 ### 1. 架构设计思路
 
-本项目基于 Sophia 项目的核心架构，采用了以下设计思路：
+本项目采用模块化、工作流驱动的设计模式，采用了以下设计思路：
 
 #### 1.1 模块化设计
 - **核心模块**（`src/core/`）：LLM 客户端、文件管理工具
@@ -13,13 +13,13 @@
 - **工作流模块**（`src/workflows/`）：整合所有功能
 
 #### 1.2 工作流设计
-参考 Sophia 的分阶段执行模式：
+采用分阶段执行模式：
 - 每个阶段有明确的输入输出
 - 支持阶段间的数据传递
 - 便于调试和优化
 
 #### 1.3 LLM 调用接口
-参考 Sophia 的 `craft_ai_func` 设计：
+设计统一的 LLM 调用接口：
 - 统一的函数签名
 - 支持 JSON schema 输出
 - 温度控制和错误处理
@@ -62,10 +62,10 @@ LLM 辅助解析（当正则失败时）
 
 ### 3. 封面图生成思路
 
-参考 Sophia 的图片生成设计：
+封面图生成设计：
 
 1. **Prompt 提取**：从 `cover_image_prompts.md` 提取详细提示词
-2. **Prompt 增强**：添加视觉风格要求（参考 Sophia 的 enhanced_prompt）
+2. **Prompt 增强**：添加视觉风格要求
 3. **生成方式**：
    - **优先使用通义万相API**：如果配置了 `DASHSCOPE_API_KEY`，将自动调用通义万相文生图API（wan2.6-t2i模型）生成封面图
    - **降级方案**：如果未配置API Key，则生成详细的 prompt 文档供手动使用（Google Nanobraow 或其他工具）
@@ -85,8 +85,8 @@ LLM 辅助解析（当正则失败时）
 
 ### 1. 文章生成 Prompt
 
-#### 1.1 设计参考
-参考 Sophia 的 `_build_content_prompt` 方法（`phase_08_content_writing.py`）
+#### 1.1 设计思路
+采用结构化的 Prompt 设计，确保输出质量
 
 #### 1.2 核心结构
 ```
@@ -181,8 +181,8 @@ Output Schema:
 
 ### 3. 大纲生成 Prompt
 
-#### 3.1 设计参考
-参考 Sophia 的 outline 生成模式（`article/SKILL.md`）
+#### 3.1 设计思路
+采用结构化的 outline 生成模式
 
 #### 3.2 输出格式
 ```json
@@ -222,7 +222,7 @@ Markdown blockquote 格式，带 attribution：
 #### 5.1 设计参考
 使用已有的 `cover_image_prompts.md` 中的详细提示词。
 
-#### 5.2 增强策略（参考 Sophia）
+#### 5.2 增强策略
 ```
 原始 Prompt
 
@@ -239,22 +239,9 @@ Avoid: Text overlays, watermarks, cluttered compositions, generic stock photo ae
 - 正式、专业的视觉语言
 - 适合官方公告和企业传播
 
-## 三、与 Sophia 的对比
+## 三、实现亮点
 
-| 特性 | Sophia | 本项目 |
-|------|--------|--------|
-| LLM 接口 | craft_ai_func | craft_ai (相同签名) |
-| 工作流模式 | 分阶段执行 | 分阶段执行 |
-| Prompt 结构 | _build_content_prompt | 参考相同结构 |
-| 输出格式 | JSON schema | JSON schema |
-| 内容规则 | NO LINKS, NO FLUFF | 相同规则 |
-| Agent 框架 | 完整框架 | 简化实现（函数调用） |
-| 浏览器自动化 | Playwright | 无（直接 API） |
-| 数据库 | PostgreSQL | JSON 文件 |
-
-## 四、实现亮点
-
-1. **完全参考 Sophia 的设计模式**：工作流、LLM 接口、Prompt 结构
+1. **统一的设计模式**：工作流、LLM 接口、Prompt 结构
 2. **使用已有数据**：直接使用提供的统计和需求分析文档
 3. **模块化设计**：核心功能独立，易于测试和扩展
 4. **Prompt 模板化**：集中管理，便于维护和优化

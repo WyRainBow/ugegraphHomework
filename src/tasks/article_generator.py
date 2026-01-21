@@ -1,5 +1,6 @@
 import json
 import re
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from src.core.file_manager import FileManager
@@ -14,7 +15,11 @@ class ArticleGenerator:
         file_manager: Optional[FileManager] = None,
     ) -> None:
         self.llm = llm_client or LLMClient()
-        self.fm = file_manager or FileManager("/Users/wy770/Apache")
+        if file_manager is None:
+            # 获取项目根目录（src/tasks 的父目录的父目录）
+            project_root = Path(__file__).resolve().parents[2]
+            file_manager = FileManager(str(project_root))
+        self.fm = file_manager
 
     def _load_prompt(self, path: str) -> str:
         return self.fm.read_text(path)
@@ -103,15 +108,24 @@ class ArticleGenerator:
             f"{prompt_template}\n\n"
             f"## 主题\n{topic}\n\n"
             f"## 项目信息\n{project_info}\n\n"
-            f"## 投票统计\n{vote_summary}\n"
+            f"## 投票统计\n{vote_summary}\n\n"
+            f"## ⚠️ 重要提醒：字数要求\n"
+            f"**必须达到 2000-3000 字，这是硬性要求！**\n\n"
+            f"请详细展开每个部分：\n"
+            f"- 项目简介部分：至少 300 字，详细介绍 HugeGraph 的功能、特点和应用场景\n"
+            f"- 孵化历程部分：至少 400 字，详细描述四年的发展过程、关键事件和里程碑\n"
+            f"- 关键成就亮点部分：每个亮点至少 200 字，详细展开社区成长、版本发布、生产应用、生态系统、治理合规等内容\n"
+            f"- 投票结果部分：至少 300 字，详细分析投票数据、社区反馈和意义\n"
+            f"- 致谢与展望部分：至少 300 字，详细表达感谢和未来规划\n\n"
+            f"**请确保文章内容丰富、详细，不要过于简洁。每个章节都要有足够的篇幅和细节。**"
         )
         return self.llm.craft_ai(
             task_category="Creating",
             task_vibe="Writing Content",
-            task_summary="Generate graduation article",
+            task_summary="Generate graduation article with 2000-3000 words in detail",
             task_instruction=instruction,
             output_schema={"type": "object"},
-            creativity_level="conservative",
+            creativity_level="balanced",  # 改为 balanced 以获得更丰富的内容
         )
 
     def extract_quotes(self, votes: List[Dict[str, Any]]) -> str:

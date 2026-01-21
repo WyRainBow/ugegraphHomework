@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from src.core.file_manager import FileManager
@@ -6,7 +7,11 @@ from src.core.file_manager import FileManager
 
 class LinkCollector:
     def __init__(self, file_manager: Optional[FileManager] = None) -> None:
-        self.fm = file_manager or FileManager("/Users/wy770/Apache")
+        if file_manager is None:
+            # 获取项目根目录（src/tasks 的父目录的父目录）
+            project_root = Path(__file__).resolve().parents[2]
+            file_manager = FileManager(str(project_root))
+        self.fm = file_manager
 
     def load_links(self, path: str = "config/links.json") -> Dict[str, Any]:
         raw = self.fm.read_text(path)

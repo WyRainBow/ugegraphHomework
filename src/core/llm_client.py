@@ -16,8 +16,8 @@ else:
     # 如果项目根目录没有 .env，尝试加载当前目录的
     load_dotenv()
 
-DEFAULT_BASE_URL = "https://www.chataiapi.com/v1"
-DEFAULT_MODEL = "gemini-2.5-pro"
+DEFAULT_BASE_URL = "https://api.deepseek.com/v1"
+DEFAULT_MODEL = "deepseek-reasoner"
 
 
 def _safe_json_loads(text: str) -> Union[Dict[str, Any], str]:
@@ -42,13 +42,14 @@ class LLMClient:
         model: Optional[str] = None,
         timeout: int = 300,
     ) -> None:
-        self.api_key = api_key or os.getenv("CHATAI_API_KEY", "")
-        self.base_url = base_url or os.getenv("CHATAI_BASE_URL", DEFAULT_BASE_URL)
+        # 优先使用 DEEPSEEK_API_KEY，如果没有则尝试 CHATAI_API_KEY（向后兼容）
+        self.api_key = api_key or os.getenv("DEEPSEEK_API_KEY") or os.getenv("CHATAI_API_KEY", "")
+        self.base_url = base_url or os.getenv("DEEPSEEK_BASE_URL") or os.getenv("CHATAI_BASE_URL", DEFAULT_BASE_URL)
         self.model = model or os.getenv("DEFAULT_LLM_MODEL", DEFAULT_MODEL)
         self.timeout = timeout
 
         if not self.api_key:
-            raise ValueError("CHATAI_API_KEY is required")
+            raise ValueError("DEEPSEEK_API_KEY or CHATAI_API_KEY is required")
 
         # OpenAI-compatible client for vision-style requests
         self._openai_client = OpenAI(api_key=self.api_key, base_url=self.base_url)
@@ -67,7 +68,7 @@ class LLMClient:
         **kwargs: Any,
     ) -> Union[str, Dict[str, Any]]:
         """
-        LLM 调用函数，匹配 Sophia 的 craft_ai_func 签名。
+        LLM 调用函数，提供统一的调用接口。
         
         Args:
             task_category: 任务类别（如 "Creating", "Analyzing"）
@@ -92,6 +93,15 @@ class LLMClient:
             system_content = f"{system_content} {processing_context}"
         if task_vibe or task_category:
             system_content = f"{system_content} {task_category or ''} {task_vibe or ''}".strip()
+        
+        # 对于文章生成任务，在系统消息中强调字数要求
+        is_article_task = (
+            task_vibe and "Writing Content" in str(task_vibe)
+        ) or (
+            task_instruction and "article" in str(task_instruction).lower()
+        )
+        if is_article_task:
+            system_content = f"{system_content}\n\nIMPORTANT: You must generate a detailed article with 2000-3000 Chinese characters (not words). This is a hard requirement. Expand each section with sufficient details, examples, and explanations. Do not be concise - provide comprehensive content."
 
         # 构建用户消息
         user_content = task_instruction
@@ -146,6 +156,22 @@ class LLMClient:
             "messages": messages,
             "temperature": temperature,
         }
+
+        # 对于文章生成等长文本任务，设置足够的 max_tokens
+        # 2000-3000字大约需要4000-6000 tokens（中文1字≈1.5-2 tokens）
+        # 检查是否是文章生成任务
+        is_article_task = (
+            task_vibe and "Writing Content" in str(task_vibe)
+        ) or (
+            task_instruction and "article" in str(task_instruction).lower()
+        ) or (
+            task_summary and "article" in str(task_summary).lower()
+        )
+        
+        if is_article_task:
+            payload["max_tokens"] = 6000  # 足够生成2000-3000字文章
+        else:
+            payload["max_tokens"] = 2000  # 其他任务默认2000
 
         if output_schema:
             payload["response_format"] = {"type": "json_object"}

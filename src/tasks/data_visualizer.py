@@ -10,7 +10,11 @@ from src.core.file_manager import FileManager
 
 class DataVisualizer:
     def __init__(self, file_manager: Optional[FileManager] = None) -> None:
-        self.fm = file_manager or FileManager("/Users/wy770/Apache")
+        if file_manager is None:
+            # 获取项目根目录（src/tasks 的父目录的父目录）
+            project_root = Path(__file__).resolve().parents[2]
+            file_manager = FileManager(str(project_root))
+        self.fm = file_manager
 
     def _parse_vote_counts(self, text: str) -> Tuple[int, int]:
         binding = re.search(r"\*\*\+1 IPMC Binding\*\*\s*\|\s*(\d+)票", text)
@@ -31,7 +35,7 @@ class DataVisualizer:
         plt.ylabel("Contributors")
         plt.tight_layout()
 
-        output_path = Path("/Users/wy770/Apache/outputs/images/community_trend.png")
+        output_path = self.fm._resolve("outputs/images/community_trend.png")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(output_path)
         plt.close()
@@ -56,7 +60,7 @@ class DataVisualizer:
         plt.title("Release Timeline")
         plt.tight_layout()
 
-        output_path = Path("/Users/wy770/Apache/outputs/images/release_timeline.png")
+        output_path = self.fm._resolve("outputs/images/release_timeline.png")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(output_path)
         plt.close()
@@ -74,7 +78,7 @@ class DataVisualizer:
         plt.title("Vote Distribution")
         plt.tight_layout()
 
-        output_path = Path("/Users/wy770/Apache/outputs/images/vote_distribution.png")
+        output_path = self.fm._resolve("outputs/images/vote_distribution.png")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         plt.savefig(output_path)
         plt.close()

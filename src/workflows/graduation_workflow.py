@@ -1,3 +1,4 @@
+from pathlib import Path
 from src.core.file_manager import FileManager
 from src.tasks.article_generator import ArticleGenerator
 from src.tasks.data_visualizer import DataVisualizer
@@ -7,8 +8,13 @@ from src.utils.dashscope_image_client import DashScopeImageClient
 
 
 class GraduationWorkflow:
-    def __init__(self) -> None:
-        self.fm = FileManager("/Users/wy770/Apache")
+    def __init__(self, base_dir: str = None) -> None:
+        # 如果没有指定 base_dir，使用当前项目根目录
+        if base_dir is None:
+            # 获取项目根目录（src/workflows 的父目录的父目录）
+            project_root = Path(__file__).resolve().parents[2]
+            base_dir = str(project_root)
+        self.fm = FileManager(base_dir)
         self.article_generator = ArticleGenerator()
         self.visualizer = DataVisualizer(self.fm)
         self.link_collector = LinkCollector(self.fm)
@@ -37,7 +43,7 @@ class GraduationWorkflow:
         content = content.replace("[VOTE_DISTRIBUTION_CHART]", f"![Vote Distribution]({vote_chart_rel})")
         
         # 替换可能存在的绝对路径和旧路径
-        content = content.replace("/Users/wy770/Apache/outputs/images/", "../images/")
+        content = content.replace(str(self.fm.base_dir) + "/outputs/images/", "../images/")
         content = content.replace("outputs/images/", "../images/")
         
         cover_image_path = "outputs/images/hugegraph_cover_image.png"
@@ -59,9 +65,12 @@ class GraduationWorkflow:
             content = content.replace(placeholder, cover_markdown)
 
         link_markdown = self.link_collector.generate_link_collection()
+        # 替换各种可能的链接占位符格式
         content = content.replace("## 链接集合占位符\n\n[链接集合占位符]", link_markdown.strip())
         content = content.replace("[链接集合占位符]", link_markdown.strip())
         content = content.replace("## 链接集合占位符", link_markdown.strip())
+        content = content.replace("[LINKS_COLLECTION_PLACEHOLDER]", link_markdown.strip())
+        content = content.replace("LINKS_COLLECTION_PLACEHOLDER", link_markdown.strip())
         return content
 
     def run(self, generate_cover: bool = True) -> None:
