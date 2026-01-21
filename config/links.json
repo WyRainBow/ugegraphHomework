@@ -1,0 +1,43 @@
+{
+  "project_links": [
+    {
+      "title": "Apache HugeGraph 官网",
+      "url": "https://hugegraph.apache.org/",
+      "description": "项目官方网站"
+    },
+    {
+      "title": "GitHub 仓库",
+      "url": "https://github.com/apache/hugegraph",
+      "description": "源代码与发布版本"
+    },
+    {
+      "title": "项目文档",
+      "url": "https://hugegraph.apache.org/docs/",
+      "description": "使用指南与 API 文档"
+    }
+  ],
+  "vote_links": [
+    {
+      "title": "毕业投票线程",
+      "url": "https://lists.apache.org/thread/djkxttgpj08v74r8rqdv3np856g3krlr",
+      "description": "Apache 邮件列表投票讨论"
+    },
+    {
+      "title": "董事会提案",
+      "url": "https://agenda.apache.org/meetings/2026-01-21?#establish-the-apache-hugegraph-project",
+      "description": "设立项目的特别提案"
+    }
+  ],
+  "related_projects": [
+    {
+      "title": "Apache SeaTunnel",
+      "url": "https://seatunnel.apache.org/",
+      "description": "数据集成平台"
+    },
+    {
+      "title": "Apache TinkerPop",
+      "url": "https://tinkerpop.apache.org/",
+      "description": "图计算框架"
+    }
+  ]
+}

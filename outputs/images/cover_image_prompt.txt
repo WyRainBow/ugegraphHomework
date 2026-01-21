@@ -1,0 +1,42 @@
+# 封面图生成提示词
+
+## 使用说明
+1. 访问 Google Nanobraow 官网
+2. 复制下面的提示词
+3. 在 Nanobraow 中输入提示词生成图片
+4. 下载生成的图片并保存为 outputs/images/hugegraph_cover_image.png
+
+## 提示词
+
+```
+Create a formal and authoritative celebration image for Apache HugeGraph's graduation from Apache Incubator to Top-Level Project status. 
+
+The composition should feature:
+- Central placement of the Apache feather logo (classic red Apache brand color #D22128) on the left side
+- HugeGraph project logo positioned next to the Apache logo, maintaining brand consistency
+- Large, bold headline text in elegant sans-serif font: "Apache HugeGraph Graduates to Top-Level Project" in white or dark text
+- Subtitle text below: "2022-2026 | Successfully Incubated" in smaller, refined typography
+- Professional color scheme: Apache red (#D22128), deep blue/dark navy for HugeGraph brand colors, clean white backgrounds
+- Subtle gradient background transitioning from dark to lighter tones
+- Celebration elements: subtle sparkles or light rays suggesting achievement and success
+- Corporate, professional aesthetic suitable for official announcements
+- Clean, spacious layout with excellent readability
+- Dimensions: 1200x630px (16:9 aspect ratio), optimized for social media sharing
+- High resolution, print-quality digital art style
+- Modern minimalist design with formal presentation suitable for technical community and enterprise audience
+
+Visual Style:
+- Aesthetic: formal, ultra-premium editorial quality
+- Dimensions: 1200x630px (16:9 aspect ratio)
+- High resolution, print-quality digital art style
+
+Avoid: Text overlays, watermarks, cluttered compositions, generic stock photo aesthetics
+```
+
+## 技术要求
+- 尺寸：1200x630px
+- 格式：PNG 或 JPG
+- 宽高比：16:9
+
+## 保存位置
+生成后请保存到：outputs/images/hugegraph_cover_image.png

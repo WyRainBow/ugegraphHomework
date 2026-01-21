@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# Environment variables
+# .env  # 已启用推送（用户要求）
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Output files (optional - uncomment if you don't want to track outputs)
+# outputs/
+
+# Logs
+*.log
+logs/
+
+# Test files
+test_*.py
+quick_test_*.py
+download_test_image.py
+setup_git.sh
